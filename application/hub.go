@@ -40,7 +40,11 @@ func NewEditorHub(document *domain.Document) *EditorHub {
 
 // Run starts the main event loop for the hub, processing registrations, departures
 // and document updates sequentially to ensure consistency.
-func (h *EditorHub) Run() {
+func (h *EditorHub) Run(bus MessageBroker) {
+	bus.Subscribe(h.Document.ID, func(d domain.Delta) {
+		h.Broadcast <- d
+	})
+
 	for {
 		select {
 		case client := <-h.Register:
